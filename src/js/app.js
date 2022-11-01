@@ -1,23 +1,36 @@
+import Config from './config'
+import Road from './road'
 import Car from './car'
 
-/** @type {HTMLCanvasElement}  */
+/** @type {HTMLCanvasElement} */
 const canvas = document.querySelector('.canvas')
 
-canvas.height = window.innerHeight
-canvas.width = 200
+canvas.height = Config.defaultCanvasHeight
+canvas.width = Config.defaultCanvasWidth
 
 const context = canvas.getContext('2d')
 
-const carHeight = 50
-const carWidth = 30
-const carY = canvas.height / 2
-const carX = canvas.width / 2
-const car = new Car(carY, carX, carWidth, carHeight)
+const road = new Road(
+  canvas.width / 2,
+  canvas.width * Config.roadEdgeMargin,
+  Config.defaultLaneWidth,
+  Config.defaultLaneColor,
+  Config.defaultLaneCount
+)
 
+const car = new Car(Config.defaultCarY, road.getLaneCenterX(1), Config.defaultCarWidth, Config.defaultCarHeight)
+
+/** @returns {void} */
 const animate = () => {
   canvas.height = window.innerHeight
 
+  context.save()
+  context.translate(0, -car.y + Config.defaultCarY)
+
+  road.draw(context)
   car.draw(context).update()
+
+  context.restore()
 
   requestAnimationFrame(animate)
 }

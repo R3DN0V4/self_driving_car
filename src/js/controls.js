@@ -4,7 +4,7 @@ export default class Controls {
   left = false
   right = false
 
-  /** @type {Record<string, (flag: boolean) => void>}  */
+  /** @type {Record<string, (flag: boolean) => void>} */
   #keys = {
     ArrowUp: flag => (this.forward = flag),
     ArrowDown: flag => (this.reverse = flag),
@@ -16,8 +16,11 @@ export default class Controls {
     this.#addKeyboardListeners()
   }
 
+  /** @returns {Controls} */
   #addKeyboardListeners() {
     document.addEventListener('keydown', event => this.#keys[event.key]?.(true))
     document.addEventListener('keyup', event => this.#keys[event.key]?.(false))
+
+    return this
   }
 }

@@ -1,14 +1,14 @@
-import config from './config'
+import Config from './config'
 import Controls from './controls'
 
 export default class Car {
-  speedLimit = config.carDefaultSpeedLimit
-  acceleration = config.carDefaultAcceleration
-  rotationAngle = config.carDefaultRotationAngle
+  speedLimit = Config.defaultCarSpeedLimit
+  acceleration = Config.defaultCarAcceleration
+  rotationAngle = Config.defaultCarRotationAngle
   speed = 0
   angle = 0
 
-  #friction = config.friction
+  #friction = Config.friction
   #controls = new Controls()
 
   /**
@@ -24,34 +24,37 @@ export default class Car {
     this.height = height
   }
 
-  /** @param {CanvasRenderingContext2D} context */
+  /**
+   * @param {CanvasRenderingContext2D} context
+   * @returns {Car}
+   */
   draw(context) {
     context.save()
-
     context.translate(this.x, this.y)
     context.rotate(-this.angle)
-
     context.beginPath()
     context.rect(-this.width / 2, -this.height / 2, this.width, this.height)
     context.fill()
-
     context.restore()
 
     return this
   }
 
+  /** @returns {Car} */
   update() {
-    this.#preventDrivingInPlace().#handleControls().#limitSpeed().#drive().#rotate()
+    this.#preventDrivingInPlace().#handleControls().#limitSpeed().#setSpeedWhileDriving().#rotate()
 
     return this
   }
 
+  /** @returns {Car} */
   #preventDrivingInPlace() {
     if (Math.abs(this.speed) < this.#friction) this.speed = 0
 
     return this
   }
 
+  /** @returns {Car} */
   #handleControls() {
     if (this.#controls.forward) this.speed += this.acceleration
     if (this.#controls.reverse) this.speed -= this.acceleration
@@ -66,6 +69,7 @@ export default class Car {
     return this
   }
 
+  /** @returns {Car} */
   #limitSpeed() {
     if (this.speed > this.speedLimit) this.speed = this.speedLimit
     else {
@@ -77,13 +81,15 @@ export default class Car {
     return this
   }
 
-  #drive() {
-    if (this.speed < 0) this.speed += this.#friction
+  /** @returns {Car} */
+  #setSpeedWhileDriving() {
     if (this.speed > 0) this.speed -= this.#friction
+    if (this.speed < 0) this.speed += this.#friction
 
     return this
   }
 
+  /** @returns {Car} */
   #rotate() {
     this.x -= Math.sin(this.angle) * this.speed
     this.y -= Math.cos(this.angle) * this.speed
