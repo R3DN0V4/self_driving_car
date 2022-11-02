@@ -13,6 +13,8 @@ export default class Config {
 
     this.defaultCarHeight = 50
     this.defaultCarWidth = 30
+    this.defaultCarColor = 'black'
+    this.defaultDamagedCarColor = 'gray'
 
     this.defaultCarEdgeY = 0.7
     this.defaultCarY = this.defaultCanvasHeight * this.defaultCarEdgeY

@@ -1,1 +1,6 @@
 export const INFINITY = 1_000_000
+
+export const CAR_CONTROL_TYPE = {
+  CONTROLLED: 'CONTROLLED',
+  DUMMY: 'DUMMY'
+}

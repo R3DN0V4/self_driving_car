@@ -1,8 +1,16 @@
+import {CAR_CONTROL_TYPE} from './constants'
+
 export default class Controls {
   #forward = false
   #reverse = false
   #left = false
   #right = false
+
+  /** @type {Record<typeof CAR_CONTROL_TYPE, () => void>} */
+  #type = {
+    [CAR_CONTROL_TYPE.CONTROLLED]: () => this.#addKeyboardListeners(),
+    [CAR_CONTROL_TYPE.DUMMY]: () => (this.#forward = true)
+  }
 
   /** @type {Record<string, (flag: boolean) => void>} */
   #keys = {
@@ -12,8 +20,9 @@ export default class Controls {
     ArrowRight: flag => (this.#right = flag)
   }
 
-  constructor() {
-    this.#addKeyboardListeners()
+  /** @param {'CONTROLLED' | 'DUMMY'} controlType */
+  constructor(controlType) {
+    this.#type[controlType]()
   }
 
   get forward() {

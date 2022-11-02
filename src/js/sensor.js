@@ -34,14 +34,15 @@ export default class Sensor {
 
   /**
    * @param {XYMatrix} roadBorders
+   * @param {Array<Car>} traffic
    * @returns {Sensor} */
-  refresh(roadBorders) {
+  refresh(roadBorders, traffic) {
     this.#castRays()
 
     this.#readings = []
 
     for (let i = 0, j = this.#rays.length; i < j; i++) {
-      this.#readings.push(this.#getReading(this.#rays[i], roadBorders))
+      this.#readings.push(this.#getReading(this.#rays[i], roadBorders, traffic))
     }
 
     return this
@@ -104,9 +105,10 @@ export default class Sensor {
   /**
    * @param {PointArray} ray
    * @param {XYMatrix} roadBorders
+   * @param {Array<Car>} traffic
    * @return {PointMatrix}
    */
-  #getReading(ray, roadBorders) {
+  #getReading(ray, roadBorders, traffic) {
     /** @type {PointArray} */
     const touches = []
 
@@ -114,6 +116,16 @@ export default class Sensor {
       const touch = getIntersection(ray[0], ray[1], roadBorders[i][0], roadBorders[i][1])
 
       if (touch) touches.push(touch)
+    }
+
+    for (let i = 0, j = traffic.length; i < j; i++) {
+      const {polygon} = traffic[i]
+
+      for (let k = 0, l = polygon.length; k < l; k++) {
+        const touch = getIntersection(ray[0], ray[1], polygon[k], polygon[(k + 1) % l])
+
+        if (touch) touches.push(touch)
+      }
     }
 
     if (!touches.length) return null

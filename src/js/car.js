@@ -4,6 +4,7 @@
 import Config from './config'
 import Controls from './controls'
 import Sensor from './sensor'
+import {CAR_CONTROL_TYPE} from './constants'
 import {isPolygonsIntersect} from './utils'
 
 /**
@@ -23,7 +24,7 @@ import {isPolygonsIntersect} from './utils'
  * @property {() => Car} refresh
  */
 export default class Car {
-  speedLimit = Config.defaultCarSpeedLimit
+  speedLimit
   acceleration = Config.defaultCarAcceleration
   rotationAngle = Config.defaultCarRotationAngle
   speed = 0
@@ -31,24 +32,37 @@ export default class Car {
   isDamaged = false
 
   #friction = Config.friction
-  #controls = new Controls()
   /** @type {XYArray}  */
   #polygon
+  #controls
   #sensor
 
   /**
+   * @param {'CONTROLLED' | 'DUMMY'} controlType
    * @param {number} y
    * @param {number} x
    * @param {number} width
    * @param {number} height
    */
-  constructor(y, x, width, height) {
+  constructor(
+    controlType,
+    y,
+    x,
+    speedLimit = Config.defaultCarSpeedLimit,
+    width = Config.defaultCarWidth,
+    height = Config.defaultCarHeight
+  ) {
     this.y = y
     this.x = x
     this.width = width
     this.height = height
+    this.speedLimit = speedLimit
 
-    this.#sensor = new Sensor(this)
+    this.#controls = new Controls(controlType)
+
+    if (controlType === CAR_CONTROL_TYPE.CONTROLLED) {
+      this.#sensor = new Sensor(this)
+    }
   }
 
   get polygon() {
@@ -57,26 +71,28 @@ export default class Car {
 
   /**
    * @param {XYMatrix} roadBorders
+   * @param {Array<Car>} traffic
    * @returns {Car} */
-  refresh(roadBorders) {
+  refresh(roadBorders, traffic) {
     if (!this.isDamaged) {
       this.#preventDrivingInPlace().#handleControls().#limitSpeed().#setSpeedWhileDriving().#rotate()
       this.#polygon = this.#createPolygon()
-      this.isDamaged = this.#assessDamage(roadBorders)
+      this.isDamaged = this.#assessDamage(roadBorders, traffic)
     }
 
-    this.#sensor.refresh(roadBorders)
+    if (this.#sensor) this.#sensor.refresh(roadBorders, traffic)
 
     return this
   }
 
   /**
    * @param {CanvasRenderingContext2D} context
+   * @param {string} color
    * @returns {Car}
    */
-  draw(context) {
-    if (this.isDamaged) context.fillStyle = 'gray'
-    else context.fillStyle = 'black'
+  draw(context, color = Config.defaultCarColor, damagedColor = Config.defaultDamagedCarColor) {
+    if (this.isDamaged) context.fillStyle = damagedColor
+    else context.fillStyle = color
 
     context.beginPath()
     context.moveTo(this.#polygon[0].x, this.#polygon[0].y)
@@ -87,7 +103,7 @@ export default class Car {
 
     context.fill()
 
-    this.#sensor.draw(context)
+    if (this.#sensor) this.#sensor.draw(context)
 
     return this
   }
@@ -168,11 +184,16 @@ export default class Car {
 
   /**
    * @param {XYMatrix} roadBorders
+   * @param {Array<Car>} traffic
    * @return {boolean}
    */
-  #assessDamage(roadBorders) {
+  #assessDamage(roadBorders, traffic) {
     for (let i = 0, j = roadBorders.length; i < j; i++) {
       if (isPolygonsIntersect(this.#polygon, roadBorders[i])) return true
+    }
+
+    for (let i = 0, j = traffic.length; i < j; i++) {
+      if (isPolygonsIntersect(this.#polygon, traffic[i].polygon)) return true
     }
 
     return false
