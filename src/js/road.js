@@ -23,8 +23,8 @@ export default class Road {
     this.laneCount = laneCount
     this.laneColor = laneColor
 
-    this.#left = this.x - (this.width / 2) // prettier-ignore
-    this.#right = this.x + (this.width / 2) // prettier-ignore
+    this.#left = this.x - this.width / 2
+    this.#right = this.x + this.width / 2
 
     const topLeft = {y: this.#top, x: this.#left}
     const bottomLeft = {y: this.#bottom, x: this.#left}
@@ -73,8 +73,7 @@ export default class Road {
    */
   getLaneCenterX(laneIndex = Math.floor(Config.defaultLaneCount / 2)) {
     const laneWidth = this.width / this.laneCount
-    const laneCenterX = this.#left + (laneWidth / 2) + (Math.min(laneIndex, this.laneCount - 1) * laneWidth) // prettier-ignore
-
+    const laneCenterX = this.#left + laneWidth / 2 + Math.min(laneIndex, this.laneCount - 1) * laneWidth
     return laneCenterX
   }
 

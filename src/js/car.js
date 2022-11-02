@@ -1,3 +1,5 @@
+/** @typedef (import('./types').Matrix) Matrix */
+
 import Config from './config'
 import Controls from './controls'
 import Sensor from './sensor'
@@ -43,7 +45,7 @@ export default class Car {
   }
 
   /**
-   * @param {Array<Array<{y: number; x: number}>>} roadBorders
+   * @param {Matrix} roadBorders
    * @returns {Car} */
   refresh(roadBorders) {
     this.#preventDrivingInPlace().#handleControls().#limitSpeed().#setSpeedWhileDriving().#rotate()

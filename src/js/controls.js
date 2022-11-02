@@ -16,13 +16,6 @@ export default class Controls {
     this.#addKeyboardListeners()
   }
 
-  #addKeyboardListeners() {
-    document.addEventListener('keydown', event => this.#keys[event.key]?.(true))
-    document.addEventListener('keyup', event => this.#keys[event.key]?.(false))
-
-    return this
-  }
-
   get forward() {
     return this.#forward
   }
@@ -37,5 +30,12 @@ export default class Controls {
 
   get right() {
     return this.#right
+  }
+
+  #addKeyboardListeners() {
+    document.addEventListener('keydown', event => this.#keys[event.key]?.(true))
+    document.addEventListener('keyup', event => this.#keys[event.key]?.(false))
+
+    return this
   }
 }
