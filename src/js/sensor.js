@@ -15,19 +15,19 @@ export default class Sensor {
 
   /**
    * @param {Car} car
+   * @param {number} raySpread
    * @param {number} rayCount
    * @param {number} rayLength
-   * @param {number} raySpread
    */
   constructor(
     car,
+    raySpread = Math.PI / 2,
     rayCount = Config.defaultCarRayCount,
-    rayLength = Config.defaultCarRayLength,
-    raySpread = Config.defaultCarRayLength
+    rayLength = Config.defaultCarRayLength
   ) {
+    this.raySpread = raySpread
     this.rayCount = rayCount
     this.rayLength = rayLength
-    this.raySpread = raySpread
 
     this.#car = car
   }
@@ -83,16 +83,16 @@ export default class Sensor {
   }
 
   #castRays() {
-    this.rays = []
+    this.#rays = []
 
     for (let i = 0; i < this.rayCount; i++) {
       const rayAngle =
         lerp(this.raySpread / 2, -this.raySpread / 2, this.rayCount === 1 ? 0.5 : i / (this.rayCount - 1)) +
         this.#car.angle
-      const rayStart = {x: this.#car.x, y: this.#car.y}
+      const rayStart = {y: this.#car.y, x: this.#car.x}
       const rayEnd = {
-        x: this.#car.x - Math.sin(rayAngle) * this.rayLength,
-        y: this.#car.y - Math.cos(rayAngle) * this.rayLength
+        y: this.#car.y - Math.cos(rayAngle) * this.rayLength,
+        x: this.#car.x - Math.sin(rayAngle) * this.rayLength
       }
 
       this.#rays.push([rayStart, rayEnd])

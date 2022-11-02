@@ -4,4 +4,6 @@
 
 /** @typedef {Array<Array<Point>>} PointMatrix */
 
+/** @typedef {Array<Omit<Point, 'offset'>>} XYArray */
+
 /** @typedef {Array<Array<Omit<Point, 'offset'>>>} XYMatrix */

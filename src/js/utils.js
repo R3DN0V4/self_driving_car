@@ -35,3 +35,27 @@ export const getIntersection = (a, b, c, d) => {
 
   return null
 }
+
+/** @typedef (import('./types').XYArray) XYArray */
+
+/**
+ * @param {XYArray} polygonA
+ * @param {XYArray} polygonB
+ * @return {boolean}
+ */
+export const isPolygonsIntersect = (polygonA, polygonB) => {
+  for (let i = 0, j = polygonA.length; i < j; i++) {
+    for (let k = 0, l = polygonB.length; k < l; k++) {
+      const touch = getIntersection(
+        polygonA[i],
+        polygonA[(i + 1) % polygonA.length],
+        polygonB[k],
+        polygonB[(k + 1) % polygonB.length]
+      )
+
+      if (touch) return true
+    }
+  }
+
+  return false
+}

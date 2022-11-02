@@ -1,16 +1,20 @@
+/** @typedef (import('./types').XYArray) XYArray */
 /** @typedef (import('./types').XYMatrix) XYMatrix */
 
 import Config from './config'
 import Controls from './controls'
 import Sensor from './sensor'
+import {isPolygonsIntersect} from './utils'
 
 /**
  * @typedef {Object} Car
  * @property {number} speedLimit
  * @property {number} acceleration
  * @property {number} rotationAngle
+ * @property {XYArray} polygon
  * @property {number} speed
  * @property {number} angle
+ * @property {boolean} isDamaged
  * @property {number} x
  * @property {number} y
  * @property {number} width
@@ -24,9 +28,12 @@ export default class Car {
   rotationAngle = Config.defaultCarRotationAngle
   speed = 0
   angle = 0
+  isDamaged = false
 
   #friction = Config.friction
   #controls = new Controls()
+  /** @type {XYArray}  */
+  #polygon
   #sensor
 
   /**
@@ -44,11 +51,19 @@ export default class Car {
     this.#sensor = new Sensor(this)
   }
 
+  get polygon() {
+    return this.#polygon
+  }
+
   /**
    * @param {XYMatrix} roadBorders
    * @returns {Car} */
   refresh(roadBorders) {
-    this.#preventDrivingInPlace().#handleControls().#limitSpeed().#setSpeedWhileDriving().#rotate()
+    if (!this.isDamaged) {
+      this.#preventDrivingInPlace().#handleControls().#limitSpeed().#setSpeedWhileDriving().#rotate()
+      this.#polygon = this.#createPolygon()
+      this.isDamaged = this.#assessDamage(roadBorders)
+    }
 
     this.#sensor.refresh(roadBorders)
 
@@ -60,16 +75,17 @@ export default class Car {
    * @returns {Car}
    */
   draw(context) {
-    context.save()
-
-    context.translate(this.x, this.y)
-    context.rotate(-this.angle)
+    if (this.isDamaged) context.fillStyle = 'gray'
+    else context.fillStyle = 'black'
 
     context.beginPath()
-    context.rect(-this.width / 2, -this.height / 2, this.width, this.height)
-    context.fill()
+    context.moveTo(this.#polygon[0].x, this.#polygon[0].y)
 
-    context.restore()
+    for (let i = 1, j = this.#polygon.length; i < j; i++) {
+      context.lineTo(this.#polygon[i].x, this.#polygon[i].y)
+    }
+
+    context.fill()
 
     this.#sensor.draw(context)
 
@@ -119,5 +135,46 @@ export default class Car {
     this.y -= Math.cos(this.angle) * this.speed
 
     return this
+  }
+
+  #createPolygon() {
+    /** @type {XYArray} */
+    const points = []
+    const alpha = Math.atan2(this.width, this.height)
+    const radius = Math.hypot(this.width, this.height) / 2
+
+    points.push({
+      y: this.y - Math.cos(this.angle - alpha) * radius,
+      x: this.x - Math.sin(this.angle - alpha) * radius
+    })
+
+    points.push({
+      y: this.y - Math.cos(this.angle + alpha) * radius,
+      x: this.x - Math.sin(this.angle + alpha) * radius
+    })
+
+    points.push({
+      y: this.y - Math.cos(Math.PI + this.angle - alpha) * radius,
+      x: this.x - Math.sin(Math.PI + this.angle - alpha) * radius
+    })
+
+    points.push({
+      y: this.y - Math.cos(Math.PI + this.angle + alpha) * radius,
+      x: this.x - Math.sin(Math.PI + this.angle + alpha) * radius
+    })
+
+    return points
+  }
+
+  /**
+   * @param {XYMatrix} roadBorders
+   * @return {boolean}
+   */
+  #assessDamage(roadBorders) {
+    for (let i = 0, j = roadBorders.length; i < j; i++) {
+      if (isPolygonsIntersect(this.#polygon, roadBorders[i])) return true
+    }
+
+    return false
   }
 }
