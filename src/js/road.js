@@ -26,10 +26,10 @@ export default class Road {
     this.#left = this.x - (this.width / 2) // prettier-ignore
     this.#right = this.x + (this.width / 2) // prettier-ignore
 
-    const topLeft = {x: this.#left, y: this.#top}
-    const bottomLeft = {x: this.#left, y: this.#bottom}
-    const topRight = {x: this.#right, y: this.#top}
-    const bottomRight = {x: this.#right, y: this.#bottom}
+    const topLeft = {y: this.#top, x: this.#left}
+    const bottomLeft = {y: this.#bottom, x: this.#left}
+    const topRight = {y: this.#top, x: this.#right}
+    const bottomRight = {y: this.#bottom, x: this.#right}
 
     this.#borders = [
       [topLeft, bottomLeft],
@@ -48,8 +48,8 @@ export default class Road {
     for (let i = 1; i <= this.laneCount - 1; i++) {
       const x = lerp(this.#left, this.#right, i / this.laneCount)
 
-      context.setLineDash([Config.defaultLaneSegmentSize, Config.defaultLaneSegmentSize])
       context.beginPath()
+      context.setLineDash([Config.defaultLaneSegmentSize, Config.defaultLaneSegmentSize])
       context.moveTo(x, this.#top)
       context.lineTo(x, this.#bottom)
       context.stroke()

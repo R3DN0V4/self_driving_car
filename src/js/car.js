@@ -1,6 +1,21 @@
 import Config from './config'
 import Controls from './controls'
+import Sensor from './sensor'
 
+/**
+ * @typedef {Object} Car
+ * @property {number} speedLimit
+ * @property {number} acceleration
+ * @property {number} rotationAngle
+ * @property {number} speed
+ * @property {number} angle
+ * @property {number} x
+ * @property {number} y
+ * @property {number} width
+ * @property {number} height
+ * @property {(context: CanvasRenderingContext2D) => Car} draw
+ * @property {() => Car} refresh
+ */
 export default class Car {
   speedLimit = Config.defaultCarSpeedLimit
   acceleration = Config.defaultCarAcceleration
@@ -10,6 +25,7 @@ export default class Car {
 
   #friction = Config.friction
   #controls = new Controls()
+  #sensor
 
   /**
    * @param {number} y
@@ -22,6 +38,19 @@ export default class Car {
     this.x = x
     this.width = width
     this.height = height
+
+    this.#sensor = new Sensor(this)
+  }
+
+  /**
+   * @param {Array<Array<{y: number; x: number}>>} roadBorders
+   * @returns {Car} */
+  refresh(roadBorders) {
+    this.#preventDrivingInPlace().#handleControls().#limitSpeed().#setSpeedWhileDriving().#rotate()
+
+    this.#sensor.refresh(roadBorders)
+
+    return this
   }
 
   /**
@@ -30,31 +59,27 @@ export default class Car {
    */
   draw(context) {
     context.save()
+
     context.translate(this.x, this.y)
     context.rotate(-this.angle)
+
     context.beginPath()
     context.rect(-this.width / 2, -this.height / 2, this.width, this.height)
     context.fill()
+
     context.restore()
 
-    return this
-  }
-
-  /** @returns {Car} */
-  update() {
-    this.#preventDrivingInPlace().#handleControls().#limitSpeed().#setSpeedWhileDriving().#rotate()
+    this.#sensor.draw(context)
 
     return this
   }
 
-  /** @returns {Car} */
   #preventDrivingInPlace() {
     if (Math.abs(this.speed) < this.#friction) this.speed = 0
 
     return this
   }
 
-  /** @returns {Car} */
   #handleControls() {
     if (this.#controls.forward) this.speed += this.acceleration
     if (this.#controls.reverse) this.speed -= this.acceleration
@@ -69,7 +94,6 @@ export default class Car {
     return this
   }
 
-  /** @returns {Car} */
   #limitSpeed() {
     if (this.speed > this.speedLimit) this.speed = this.speedLimit
     else {
@@ -81,7 +105,6 @@ export default class Car {
     return this
   }
 
-  /** @returns {Car} */
   #setSpeedWhileDriving() {
     if (this.speed > 0) this.speed -= this.#friction
     if (this.speed < 0) this.speed += this.#friction
@@ -89,7 +112,6 @@ export default class Car {
     return this
   }
 
-  /** @returns {Car} */
   #rotate() {
     this.x -= Math.sin(this.angle) * this.speed
     this.y -= Math.cos(this.angle) * this.speed

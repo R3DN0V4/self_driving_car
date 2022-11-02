@@ -20,7 +20,6 @@ const road = new Road(
 
 const car = new Car(Config.defaultCarY, road.getLaneCenterX(1), Config.defaultCarWidth, Config.defaultCarHeight)
 
-/** @returns {void} */
 const animate = () => {
   canvas.height = window.innerHeight
 
@@ -28,7 +27,7 @@ const animate = () => {
   context.translate(0, -car.y + Config.defaultCarY)
 
   road.draw(context)
-  car.draw(context).update()
+  car.refresh(road.borders).draw(context)
 
   context.restore()
 

@@ -9,15 +9,21 @@ export default class Config {
     this.defaultLaneCount = 3
     this.defaultLaneSegmentSize = 20
 
+    this.friction = 0.05
+
     this.defaultCarHeight = 50
     this.defaultCarWidth = 30
 
-    this.friction = 0.05
+    this.defaultCarEdgeY = 0.7
+    this.defaultCarY = this.defaultCanvasHeight * this.defaultCarEdgeY
 
-    this.carEdgeY = 0.7
-    this.defaultCarY = this.defaultCanvasHeight * this.carEdgeY
     this.defaultCarSpeedLimit = 3
     this.defaultCarAcceleration = 0.2
     this.defaultCarRotationAngle = 0.03
+
+    this.defaultCarRayLineWidth = 2
+    this.defaultCarRayLineColor = 'yellow'
+    this.defaultCarRayCount = 5
+    this.defaultCarRayLength = 150
   }
 }
