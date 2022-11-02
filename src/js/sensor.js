@@ -1,37 +1,58 @@
+/** @typedef (import('./types').PointArray) PointArray */
+/** @typedef (import('./types').PointMatrix) PointMatrix */
+/** @typedef (import('./types').XYMatrix) XYMatrix */
 /** @typedef {import('./car').Car} Car */
 
 import Config from './config'
 import {lerp, getIntersection} from './utils'
 
 export default class Sensor {
-  rayCount = Config.defaultCarRayCount
-  rayLength = Config.defaultCarRayLength
-  raySpread = Math.PI / 2
-  /** @type {Array<Array<{x: number; y: number}>>} */
-  rays = []
-  /** @type {Array<{y: number; x: number; offset: number}>} */
-  readings = []
-
   #car
+  /** @type {XYMatrix} */
+  #rays = []
+  /** @type {PointArray} */
+  #readings = []
 
-  /** @param {Car} car */
-  constructor(car) {
+  /**
+   * @param {Car} car
+   * @param {number} rayCount
+   * @param {number} rayLength
+   * @param {number} raySpread
+   */
+  constructor(
+    car,
+    rayCount = Config.defaultCarRayCount,
+    rayLength = Config.defaultCarRayLength,
+    raySpread = Config.defaultCarRayLength
+  ) {
+    this.rayCount = rayCount
+    this.rayLength = rayLength
+    this.raySpread = raySpread
+
     this.#car = car
   }
 
   /**
-   * @param {Array<Array<{y: number; x: number}>>} roadBorders
+   * @param {XYMatrix} roadBorders
    * @returns {Sensor} */
   refresh(roadBorders) {
     this.#castRays()
 
-    this.readings = []
+    this.#readings = []
 
-    for (let i = 0, j = this.rays.length; i < j; i++) {
-      this.readings.push(this.#getReading(this.rays[i], roadBorders))
+    for (let i = 0, j = this.#rays.length; i < j; i++) {
+      this.#readings.push(this.#getReading(this.#rays[i], roadBorders))
     }
 
     return this
+  }
+
+  get rays() {
+    return this.#rays
+  }
+
+  get readings() {
+    return this.#readings
   }
 
   /**
@@ -40,20 +61,20 @@ export default class Sensor {
    */
   draw(context) {
     for (let i = 0; i < this.rayCount; i++) {
-      let end = this.rays[i][1]
+      let end = this.#rays[i][1]
 
-      if (this.readings[i]) end = this.readings[i]
+      if (this.#readings[i]) end = this.#readings[i]
 
       context.beginPath()
       context.strokeStyle = Config.defaultCarRayLineColor
       context.lineWidth = Config.defaultCarRayLineWidth
-      context.moveTo(this.rays[i][0].x, this.rays[i][0].y)
+      context.moveTo(this.#rays[i][0].x, this.#rays[i][0].y)
       context.lineTo(end.x, end.y)
       context.stroke()
 
       context.beginPath()
       context.strokeStyle = 'black'
-      context.moveTo(this.rays[i][1].x, this.rays[i][1].y)
+      context.moveTo(this.#rays[i][1].x, this.#rays[i][1].y)
       context.lineTo(end.x, end.y)
       context.stroke()
     }
@@ -70,23 +91,23 @@ export default class Sensor {
         this.#car.angle
       const rayStart = {x: this.#car.x, y: this.#car.y}
       const rayEnd = {
-        x: this.#car.x - (Math.sin(rayAngle) * this.rayLength), // prettier-ignore
-        y: this.#car.y - (Math.cos(rayAngle) * this.rayLength) // prettier-ignore
+        x: this.#car.x - Math.sin(rayAngle) * this.rayLength,
+        y: this.#car.y - Math.cos(rayAngle) * this.rayLength
       }
 
-      this.rays.push([rayStart, rayEnd])
+      this.#rays.push([rayStart, rayEnd])
     }
 
     return this
   }
 
   /**
-   * @param {Array<{x: number; y: number}>} ray
-   * @param {Array<Array<{y: number; x: number}>>} roadBorders
-   * @return {{y: number; x: number; offset: number}}
+   * @param {PointArray} ray
+   * @param {XYMatrix} roadBorders
+   * @return {PointMatrix}
    */
   #getReading(ray, roadBorders) {
-    /** @type {Array<{y: number; x: number; offset: number}>} */
+    /** @type {PointArray} */
     const touches = []
 
     for (let i = 0, j = roadBorders.length; i < j; i++) {

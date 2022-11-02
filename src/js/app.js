@@ -2,8 +2,7 @@ import Config from './config'
 import Road from './road'
 import Car from './car'
 
-/** @type {HTMLCanvasElement} */
-const canvas = document.querySelector('.canvas')
+const canvas = document.querySelector('canvas')
 
 canvas.height = Config.defaultCanvasHeight
 canvas.width = Config.defaultCanvasWidth

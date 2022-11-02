@@ -5,6 +5,6 @@ body {
   text-align: center;
 }
 
-.canvas {
+canvas {
   background: lightgrey;
 }

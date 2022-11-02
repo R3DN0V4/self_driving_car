@@ -1,4 +1,4 @@
-/** @typedef (import('./types').Matrix) Matrix */
+/** @typedef (import('./types').XYMatrix) XYMatrix */
 
 import Config from './config'
 import Controls from './controls'
@@ -45,7 +45,7 @@ export default class Car {
   }
 
   /**
-   * @param {Matrix} roadBorders
+   * @param {XYMatrix} roadBorders
    * @returns {Car} */
   refresh(roadBorders) {
     this.#preventDrivingInPlace().#handleControls().#limitSpeed().#setSpeedWhileDriving().#rotate()

@@ -37,6 +37,26 @@ export default class Road {
     ]
   }
 
+  get top() {
+    return this.#top
+  }
+
+  get bottom() {
+    return this.#bottom
+  }
+
+  get left() {
+    return this.#left
+  }
+
+  get right() {
+    return this.#right
+  }
+
+  get borders() {
+    return this.#borders
+  }
+
   /**
    * @param {CanvasRenderingContext2D} context
    * @returns {Road}
@@ -74,26 +94,7 @@ export default class Road {
   getLaneCenterX(laneIndex = Math.floor(Config.defaultLaneCount / 2)) {
     const laneWidth = this.width / this.laneCount
     const laneCenterX = this.#left + laneWidth / 2 + Math.min(laneIndex, this.laneCount - 1) * laneWidth
+
     return laneCenterX
-  }
-
-  get top() {
-    return this.#top
-  }
-
-  get bottom() {
-    return this.#bottom
-  }
-
-  get left() {
-    return this.#left
-  }
-
-  get right() {
-    return this.#right
-  }
-
-  get borders() {
-    return this.#borders
   }
 }
